@@ -24,6 +24,23 @@ This script writes directly to inverter control registers and can cause the batt
 
 ---
 
+## Prerequisites
+
+Before using this script, you need to enable and configure Modbus TCP on your Fronius inverter. In the Fronius web interface, go to **Communication → Modbus** and set the following:
+
+| Setting | Value |
+|---------|-------|
+| Mode | TCP Server |
+| Port | 502 (default) |
+| Sunspec Model Type | **int + SF** |
+| Meter Address Offset | 200 |
+| Allow Control via Modbus | On |
+| Restrict Control | Off |
+
+> **The `Sunspec Model Type` setting is critical.** This must be set to `int + SF` (integer with separate scale factor registers). The entire register map used by this script — including all register addresses, value formats, and scale factor registers like `InOutWRte_SF` (40368) — assumes `int + SF` mode. If your inverter is set to `float` mode instead, the register addresses will be different and the script will not work correctly.
+
+---
+
 ## The RvrtTms Gotcha
 
 If you've tried to control a Fronius GEN24 via Modbus before and found your writes silently reverting after a second or two, this is almost certainly why.
@@ -60,6 +77,8 @@ The sign conventions are the non-obvious part. A **negative** `OutWRte` creates 
 This script sends SunSpec register addresses directly on the wire without subtracting any offset. This is correct for the Fronius GEN24 — register 40345 is sent as address 40345 in the Modbus request.
 
 This differs from some Modbus devices and libraries where a -1 or -40001 offset is applied before sending. If you are adapting this for a different inverter, verify the addressing convention against your inverter's Modbus documentation before writing any control registers.
+
+Note that the register addresses used throughout this documentation assume the `Sunspec Model Type` is set to `int + SF` (see [Prerequisites](#prerequisites)). The `float` model type uses a different register layout.
 
 ---
 
